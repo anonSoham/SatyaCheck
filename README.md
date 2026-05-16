@@ -1,29 +1,39 @@
-# SatyaCheck Frontend
+# SatyaCheck
 
-Frontend-only React + TypeScript + Tailwind CSS demo for a regional fake news detector.
+SatyaCheck is a React, TypeScript, and Tailwind CSS frontend for a regional fake news detection platform focused on Indian languages.
 
-## Install
+## Tech Stack
+
+- React 19
+- TypeScript
+- Vite
+- Tailwind CSS
+- Lucide React
+
+## Project Structure
+
+```text
+src/
+  components/
+    ui/              # Reusable UI primitives
+  data/              # Static product content and analysis fixtures
+  hooks/             # Reusable React hooks
+  types/             # Shared TypeScript types
+  App.tsx            # Page composition and feature sections
+  index.css          # Global styles and design tokens
+  main.tsx           # React entry point
+```
+
+## Scripts
 
 ```powershell
 npm install
-```
-
-## Run
-
-```powershell
 npm run dev
-```
-
-Open the local URL printed by Vite.
-
-## Build
-
-```powershell
 npm run build
+npm run preview
 ```
 
 ## Notes
 
-- No backend, database, ML, OCR, API keys, or external API calls are used.
-- The analyzer uses mock data only.
-- The hero particle background is implemented manually with React Canvas to match the anti-gravity particle reference style.
+- Generated folders such as `node_modules/` and `dist/` are intentionally ignored.
+- Keep secrets in local `.env` files only. Do not commit API keys or private credentials.

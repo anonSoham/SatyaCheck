@@ -2,20 +2,17 @@ import {
   AlertTriangle,
   BadgeCheck,
   BrainCircuit,
-  FileSearch,
-  ImageUp,
-  Languages,
-  Link2,
-  MessageSquareWarning,
-  Mic2,
   MousePointer2,
   SearchCheck,
   ShieldAlert,
   ShieldCheck,
   UploadCloud,
 } from "lucide-react";
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { GlassButton } from "@/components/ui/glass-button";
+import { analysisResult, features, impact, sampleClaim, steps } from "@/data/site-content";
+import { useScrollReveal } from "@/hooks/use-scroll-reveal";
+import type { AnalysisResult, FeatureItem } from "@/types/analysis";
 
 type Particle = {
   x: number;
@@ -29,81 +26,6 @@ type Particle = {
   twinkle: number;
   tone: "white" | "blue";
 };
-
-type DemoResult = {
-  verdict: string;
-  confidence: number;
-  riskLevel: string;
-  explanation: string;
-  sources: string[];
-};
-
-const mockResult: DemoResult = {
-  verdict: "Misleading",
-  confidence: 87,
-  riskLevel: "High",
-  explanation:
-    "This claim appears suspicious because it uses emotional language, lacks official sources, and resembles previously debunked viral messages.",
-  sources: ["PIB Fact Check", "Alt News", "BOOM Live", "Factly"],
-};
-
-const features = [
-  {
-    icon: FileSearch,
-    title: "Text-Based Fake News Detection",
-    body: "Analyze suspicious forwards, headlines, and local claims for credibility signals.",
-  },
-  {
-    icon: ImageUp,
-    title: "Screenshot/Image Verification",
-    body: "Demo upload flow for WhatsApp screenshots, posts, and edited news cards.",
-  },
-  {
-    icon: Link2,
-    title: "Fact-Check Source Matching",
-    body: "Surface trusted references from PIB Fact Check, Alt News, BOOM Live, and Factly.",
-  },
-  {
-    icon: Languages,
-    title: "Regional Language Support",
-    body: "Designed first for Marathi, Hindi, and English, with more Indian languages planned.",
-  },
-  {
-    icon: BrainCircuit,
-    title: "AI Explanation System",
-    body: "Show why a claim looks suspicious instead of only returning a label.",
-  },
-  {
-    icon: MessageSquareWarning,
-    title: "WhatsApp Forward Risk Score",
-    body: "Highlight panic language, missing sources, and viral message patterns.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Government Scheme Verification",
-    body: "Present a clear frontend path for checking jobs, exams, schemes, and notices.",
-  },
-  {
-    icon: Mic2,
-    title: "Voice Note Verification",
-    body: "Future-ready UI for analyzing speech-to-text transcripts from audio claims.",
-  },
-];
-
-const steps = [
-  "Select language",
-  "Paste text or upload screenshot",
-  "AI detects language and claim pattern",
-  "Credibility analysis runs",
-  "Verdict, score, explanation, and references appear",
-];
-
-const impact = [
-  "Supports underserved regional languages",
-  "Designed for WhatsApp-forward verification",
-  "Explains why a claim is suspicious",
-  "Built for real-world social impact",
-];
 
 function scrollToSection(href: string) {
   document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
@@ -293,13 +215,13 @@ function Navbar() {
   ];
 
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 px-4 pt-4 sm:px-6">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between rounded-full border border-white/10 bg-black/35 px-4 py-3 shadow-2xl shadow-blue-950/20 backdrop-blur-2xl sm:px-5">
+    <header className="fixed left-0 right-0 top-0 z-50 px-3 pt-3 sm:px-6 sm:pt-4">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between gap-3 rounded-3xl border border-white/10 bg-black/35 px-3 py-2.5 shadow-2xl shadow-blue-950/20 backdrop-blur-2xl sm:rounded-full sm:px-5 sm:py-3">
         <a href="#top" className="flex items-center gap-2" aria-label="SatyaCheck home">
-          <span className="relative grid h-9 w-9 place-items-center rounded-full border border-cyan-300/30 bg-cyan-400/10 text-cyan-200 shadow-glow">
+          <span className="relative grid h-8 w-8 shrink-0 place-items-center rounded-full border border-cyan-300/30 bg-cyan-400/10 text-cyan-200 shadow-glow sm:h-9 sm:w-9">
             <ShieldAlert className="h-4 w-4" aria-hidden="true" />
           </span>
-          <span className="font-sans text-base font-semibold tracking-tight text-white">SatyaCheck</span>
+          <span className="text-sm font-semibold tracking-tight text-white sm:text-base">SatyaCheck</span>
         </a>
 
         <div className="hidden items-center gap-7 md:flex">
@@ -318,10 +240,11 @@ function Navbar() {
           type="button"
           size="sm"
           onClick={() => scrollToSection("#demo")}
-          contentClassName="flex items-center gap-2"
+          contentClassName="flex items-center gap-1.5 sm:gap-2"
         >
           <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-          Verify Claim
+          <span>Verify</span>
+          <span className="hidden min-[380px]:inline">Claim</span>
         </GlassButton>
       </nav>
     </header>
@@ -330,10 +253,10 @@ function Navbar() {
 
 function HeroSection() {
   return (
-    <section id="top" className="relative flex min-h-screen items-center overflow-hidden px-4 py-32 sm:px-6 sm:py-36 lg:px-8 lg:py-40">
-      <div className="relative z-10 mx-auto flex w-full max-w-[78rem] flex-col items-center pt-14 text-center sm:pt-16 lg:pt-12">
+    <section id="top" className="relative flex min-h-[100svh] items-center overflow-hidden px-4 pb-24 pt-28 sm:px-6 sm:py-36 lg:px-8 lg:py-40">
+      <div className="relative z-10 mx-auto flex w-full max-w-[78rem] flex-col items-center pt-12 text-center sm:pt-16 lg:pt-12">
         <div className="max-w-[76rem]">
-          <h1 className="font-display text-[clamp(2.6rem,12vw,4rem)] font-semibold leading-[0.94] tracking-[-0.04em] text-white text-balance sm:text-[clamp(3.2rem,7vw,5.5rem)] lg:text-[clamp(4.5rem,8vw,8.5rem)]">
+          <h1 className="font-display text-[clamp(2.35rem,10vw,3.55rem)] font-semibold leading-[0.98] tracking-[-0.025em] text-white text-balance sm:text-[clamp(2.85rem,6vw,4.8rem)] lg:text-[clamp(3.8rem,6.7vw,6.9rem)]">
             Detect{" "}
             <span className="bg-gradient-to-r from-cyan-100 via-sky-300 to-blue-500 bg-clip-text text-transparent">
               Fake News
@@ -344,11 +267,11 @@ function HeroSection() {
             </span>
           </h1>
 
-          <p className="mx-auto mt-8 max-w-[45rem] font-sans text-lg leading-8 text-slate-300/90 sm:mt-9 sm:text-xl sm:leading-9">
+          <p className="mx-auto mt-7 max-w-[45rem] text-base leading-7 text-slate-300/90 sm:mt-8 sm:text-lg sm:leading-8">
             Verify suspicious WhatsApp forwards, screenshots, social media posts, and local-language claims using AI-powered credibility analysis.
           </p>
 
-          <div className="mt-10 flex justify-center sm:mt-11">
+          <div className="mt-8 flex justify-center sm:mt-11">
             <a
               href="#features"
               className="inline-flex items-center justify-center gap-2 rounded-full border border-white/15 bg-white/5 px-6 py-3 font-sans text-sm font-semibold tracking-tight text-white backdrop-blur transition hover:-translate-y-0.5 hover:border-cyan-200/50 hover:bg-cyan-300/10 focus:outline-none focus:ring-2 focus:ring-cyan-300 focus:ring-offset-2 focus:ring-offset-black"
@@ -365,38 +288,32 @@ function HeroSection() {
 function DemoAnalyzer() {
   const [language, setLanguage] = useState("Marathi");
   const [claim, setClaim] = useState("");
-  const [result, setResult] = useState<DemoResult | null>(null);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState("");
-
-  const sampleClaim = useMemo(
-    () =>
-      "Forwarded message claims a new government scheme gives instant cash benefits if citizens register through an unknown link today.",
-    [],
-  );
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!claim.trim()) {
       setResult(null);
-      setError("Paste a claim before running the mock analysis.");
+      setError("Paste a claim before running the analysis.");
       return;
     }
 
     setError("");
-    setResult(mockResult);
+    setResult(analysisResult);
   };
 
   return (
-    <section id="demo" className="relative px-4 pb-24 pt-10 sm:px-6 sm:pt-16 lg:px-8">
+    <section id="demo" className="relative px-4 pb-16 pt-8 sm:px-6 sm:pb-24 sm:pt-16 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <SectionHeader
           title="Analyze a suspicious claim"
-          body="This demo uses mock data only. It shows the exact user experience planned for the real detector."
+          body="Paste a message, headline, or local claim to review its credibility signals."
         />
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <form onSubmit={handleSubmit} className="glass-panel rounded-[2rem] p-5 sm:p-7">
+        <div className="mt-8 grid gap-5 sm:mt-12 sm:gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+          <form onSubmit={handleSubmit} className="glass-panel reveal-on-scroll rounded-3xl p-4 sm:rounded-[2rem] sm:p-7" data-reveal>
             <div className="grid gap-5">
               <label className="grid gap-2">
                 <span className="text-sm font-medium text-slate-200">Language</span>
@@ -418,7 +335,7 @@ function DemoAnalyzer() {
                   onChange={(event) => setClaim(event.target.value)}
                   rows={8}
                   placeholder="Paste suspicious news, WhatsApp forward, or claim here..."
-                  className="resize-none rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-4 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/30"
+                  className="min-h-44 resize-none rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-4 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-300 focus:ring-2 focus:ring-cyan-300/30 sm:min-h-52"
                 />
               </label>
 
@@ -433,14 +350,14 @@ function DemoAnalyzer() {
                 Use sample claim
               </button>
 
-              <div className="rounded-2xl border border-dashed border-cyan-200/25 bg-cyan-300/[0.04] p-5">
-                <div className="flex items-center gap-3">
-                  <span className="grid h-11 w-11 place-items-center rounded-2xl bg-cyan-300/10 text-cyan-100">
+              <div className="rounded-2xl border border-dashed border-cyan-200/25 bg-cyan-300/[0.04] p-4 sm:p-5">
+                <div className="flex items-start gap-3 sm:items-center">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-cyan-300/10 text-cyan-100 sm:h-11 sm:w-11">
                     <UploadCloud className="h-5 w-5" aria-hidden="true" />
                   </span>
                   <div>
                     <p className="font-medium text-white">Screenshot upload UI</p>
-                    <p className="text-sm text-slate-400">Frontend-only placeholder for image verification.</p>
+                    <p className="text-sm text-slate-400">Upload screenshots from WhatsApp, social media, or news cards.</p>
                   </div>
                 </div>
               </div>
@@ -468,15 +385,15 @@ function DemoAnalyzer() {
   );
 }
 
-function ResultPanel({ result, language }: { result: DemoResult | null; language: string }) {
+function ResultPanel({ result, language }: { result: AnalysisResult | null; language: string }) {
   if (!result) {
     return (
-      <div className="glass-panel grid min-h-[32rem] place-items-center rounded-[2rem] p-7 text-center">
+      <div className="glass-panel reveal-on-scroll grid min-h-[24rem] place-items-center rounded-3xl p-5 text-center sm:min-h-[32rem] sm:rounded-[2rem] sm:p-7" data-reveal>
         <div className="max-w-sm">
           <span className="mx-auto grid h-16 w-16 place-items-center rounded-3xl border border-cyan-200/20 bg-cyan-300/10 text-cyan-100">
             <MousePointer2 className="h-7 w-7" aria-hidden="true" />
           </span>
-          <h3 className="mt-5 font-sans text-2xl font-semibold tracking-tight text-white">Mock result appears here</h3>
+          <h3 className="mt-5 text-xl font-semibold tracking-tight text-white">Result appears here</h3>
           <p className="mt-3 text-slate-400">
             Add a claim and click analyze to preview verdict, confidence, risk level, explanation, and sources.
           </p>
@@ -486,11 +403,11 @@ function ResultPanel({ result, language }: { result: DemoResult | null; language
   }
 
   return (
-    <div className="glass-panel min-h-[32rem] rounded-[2rem] p-5 sm:p-7 animate-fade-up">
+    <div className="glass-panel min-h-[24rem] rounded-3xl p-4 animate-fade-up sm:min-h-[32rem] sm:rounded-[2rem] sm:p-7">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="text-sm text-slate-400">Detected language</p>
-          <p className="font-sans text-xl font-semibold tracking-tight text-white">{language}</p>
+          <p className="text-xl font-semibold tracking-tight text-white">{language}</p>
         </div>
         <span className="inline-flex items-center gap-2 rounded-full border border-amber-200/30 bg-amber-400/15 px-4 py-2 text-sm font-semibold text-amber-100">
           <AlertTriangle className="h-4 w-4" aria-hidden="true" />
@@ -498,11 +415,11 @@ function ResultPanel({ result, language }: { result: DemoResult | null; language
         </span>
       </div>
 
-      <div className="mt-7 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5">
+      <div className="mt-6 grid gap-3 sm:mt-7 sm:grid-cols-2 sm:gap-4">
+        <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-4 sm:p-5">
           <p className="text-sm text-slate-400">Confidence</p>
           <div className="mt-3 flex items-end gap-2">
-            <span className="font-sans text-5xl font-semibold tracking-tight text-white">{result.confidence}</span>
+            <span className="text-4xl font-semibold tracking-tight text-white">{result.confidence}</span>
             <span className="pb-2 text-xl text-cyan-200">%</span>
           </div>
           <div className="mt-5 h-2 overflow-hidden rounded-full bg-white/10">
@@ -513,14 +430,14 @@ function ResultPanel({ result, language }: { result: DemoResult | null; language
           </div>
         </div>
 
-        <div className="rounded-3xl border border-red-200/10 bg-red-500/[0.06] p-5">
+        <div className="rounded-3xl border border-red-200/10 bg-red-500/[0.06] p-4 sm:p-5">
           <p className="text-sm text-slate-400">Risk Level</p>
-          <p className="mt-3 font-sans text-5xl font-semibold tracking-tight text-red-100">{result.riskLevel}</p>
+          <p className="mt-3 text-4xl font-semibold tracking-tight text-red-100">{result.riskLevel}</p>
           <p className="mt-4 text-sm text-slate-400">Urgent forwarding and missing sources increase the risk score.</p>
         </div>
       </div>
 
-      <div className="mt-4 rounded-3xl border border-cyan-200/10 bg-cyan-300/[0.06] p-5">
+      <div className="mt-4 rounded-3xl border border-cyan-200/10 bg-cyan-300/[0.06] p-4 sm:p-5">
         <div className="flex items-center gap-2 text-cyan-100">
           <BrainCircuit className="h-5 w-5" aria-hidden="true" />
           <h3 className="font-semibold">AI Explanation</h3>
@@ -534,7 +451,7 @@ function ResultPanel({ result, language }: { result: DemoResult | null; language
           {result.sources.map((source) => (
             <span
               key={source}
-              className="rounded-full border border-white/10 bg-white/[0.06] px-4 py-2 text-sm text-slate-200"
+              className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-sm text-slate-200 sm:px-4"
             >
               {source}
             </span>
@@ -545,13 +462,13 @@ function ResultPanel({ result, language }: { result: DemoResult | null; language
   );
 }
 
-function FeatureCard({ icon: Icon, title, body }: { icon: typeof FileSearch; title: string; body: string }) {
+function FeatureCard({ icon: Icon, title, body }: FeatureItem) {
   return (
-    <article className="group glass-panel rounded-3xl p-6 transition duration-300 hover:-translate-y-1 hover:border-cyan-200/35 hover:shadow-glow">
+    <article className="group glass-panel reveal-on-scroll rounded-3xl p-5 transition duration-300 hover:-translate-y-1 hover:border-cyan-200/35 hover:shadow-glow sm:p-6" data-reveal>
       <span className="grid h-12 w-12 place-items-center rounded-2xl border border-cyan-200/20 bg-cyan-300/10 text-cyan-100 transition group-hover:scale-105">
         <Icon className="h-6 w-6" aria-hidden="true" />
       </span>
-      <h3 className="mt-5 font-sans text-xl font-semibold leading-7 tracking-tight text-white">{title}</h3>
+      <h3 className="mt-5 text-lg font-semibold leading-7 tracking-tight text-white">{title}</h3>
       <p className="mt-3 leading-7 text-slate-400">{body}</p>
     </article>
   );
@@ -559,13 +476,13 @@ function FeatureCard({ icon: Icon, title, body }: { icon: typeof FileSearch; tit
 
 function FeaturesSection() {
   return (
-    <section id="features" className="px-4 py-24 sm:px-6 lg:px-8">
+    <section id="features" className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <SectionHeader
           title="Built around real misinformation workflows"
-          body="The frontend presents a complete product story while keeping implementation mock-only for this phase."
+          body="Review text, screenshots, source credibility, regional language signals, and explanation quality in one flow."
         />
-        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-4 sm:mt-12 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((feature) => (
             <FeatureCard key={feature.title} {...feature} />
           ))}
@@ -577,16 +494,20 @@ function FeaturesSection() {
 
 function HowItWorks() {
   return (
-    <section id="how-it-works" className="relative px-4 py-24 sm:px-6 lg:px-8">
+    <section id="how-it-works" className="relative px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
       <div className="absolute inset-x-0 top-1/2 -z-10 h-px bg-gradient-to-r from-transparent via-cyan-300/25 to-transparent" />
       <div className="mx-auto max-w-7xl">
         <SectionHeader
           title="Five clear steps from claim to verdict"
-          body="A simple flow that makes the demo easy to explain during a college project review."
+          body="A simple verification flow that keeps the result understandable and easy to act on."
         />
-        <div className="mt-12 grid gap-4 md:grid-cols-5">
+        <div className="mt-8 grid gap-4 sm:mt-12 md:grid-cols-5">
           {steps.map((step, index) => (
-            <article key={step} className="glass-panel relative rounded-3xl p-5 transition hover:-translate-y-1 hover:border-cyan-200/35">
+            <article
+              key={step}
+              className="glass-panel reveal-on-scroll relative rounded-3xl p-5 transition hover:-translate-y-1 hover:border-cyan-200/35"
+              data-reveal
+            >
               <GlassButton
                 type="button"
                 size="icon"
@@ -595,7 +516,7 @@ function HowItWorks() {
               >
                 {index + 1}
               </GlassButton>
-              <h3 className="mt-5 font-sans text-base font-semibold leading-6 tracking-tight text-white">{step}</h3>
+              <h3 className="mt-5 text-base font-semibold leading-6 tracking-tight text-white">{step}</h3>
             </article>
           ))}
         </div>
@@ -606,17 +527,17 @@ function HowItWorks() {
 
 function ImpactSection() {
   return (
-    <section id="future-scope" className="px-4 py-24 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl overflow-hidden rounded-[2.5rem] border border-cyan-200/15 bg-gradient-to-br from-cyan-300/12 via-blue-500/10 to-white/[0.03] p-6 shadow-card sm:p-10 lg:p-12">
-        <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+    <section id="future-scope" className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+      <div className="reveal-on-scroll mx-auto max-w-7xl overflow-hidden rounded-3xl border border-cyan-200/15 bg-gradient-to-br from-cyan-300/12 via-blue-500/10 to-white/[0.03] p-5 shadow-card sm:rounded-[2.5rem] sm:p-10 lg:p-12" data-reveal>
+        <div className="grid gap-8 sm:gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <div>
-            <h2 className="font-display text-[clamp(2.75rem,5vw,5.5rem)] font-semibold leading-[0.96] tracking-[-0.035em] text-white text-balance">
+            <h2 className="font-display text-[clamp(2.25rem,4.4vw,4.25rem)] font-semibold leading-[1] tracking-[-0.025em] text-white text-balance">
               Designed for misinformation awareness where it spreads fastest.
             </h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             {impact.map((item) => (
-              <div key={item} className="rounded-3xl border border-white/10 bg-black/25 p-5 backdrop-blur">
+              <div key={item} className="rounded-3xl border border-white/10 bg-black/25 p-4 backdrop-blur sm:p-5">
                 <BadgeCheck className="h-6 w-6 text-cyan-200" aria-hidden="true" />
                 <p className="mt-4 font-medium leading-7 text-white">{item}</p>
               </div>
@@ -637,20 +558,20 @@ function Footer() {
   ];
 
   return (
-    <footer className="px-4 py-10 sm:px-6 lg:px-8">
+    <footer className="px-4 py-8 sm:px-6 sm:py-10 lg:px-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 md:flex-row md:items-center md:justify-between">
         <div>
           <div className="flex items-center gap-2">
             <span className="grid h-9 w-9 place-items-center rounded-full border border-cyan-300/30 bg-cyan-400/10 text-cyan-200">
               <ShieldAlert className="h-4 w-4" aria-hidden="true" />
             </span>
-            <p className="font-sans text-lg font-semibold tracking-tight text-white">SatyaCheck</p>
+            <p className="text-lg font-semibold tracking-tight text-white">SatyaCheck</p>
           </div>
           <p className="mt-3 max-w-md text-sm leading-6 text-slate-400">
-            Regional Fake News Detector frontend demo. Made for multilingual misinformation awareness.
+            Regional Fake News Detector for multilingual misinformation awareness.
           </p>
         </div>
-        <div className="flex flex-wrap gap-3 text-sm text-slate-400">
+        <div className="grid grid-cols-2 gap-3 text-sm text-slate-400 sm:flex sm:flex-wrap">
           {footerLinks.map((item) => (
             <GlassButton
               key={item.href}
@@ -669,16 +590,18 @@ function Footer() {
 
 function SectionHeader({ title, body }: { title: string; body: string }) {
   return (
-    <div className="mx-auto max-w-3xl text-center">
-      <h2 className="font-display text-[clamp(2.75rem,5vw,5.75rem)] font-semibold leading-[0.96] tracking-[-0.035em] text-white text-balance">
+    <div className="reveal-on-scroll mx-auto max-w-3xl text-center" data-reveal>
+      <h2 className="font-display text-[clamp(2.25rem,4.4vw,4.4rem)] font-semibold leading-[1] tracking-[-0.025em] text-white text-balance">
         {title}
       </h2>
-      <p className="mt-5 text-lg leading-8 text-slate-400">{body}</p>
+      <p className="mt-4 text-base leading-7 text-slate-400 sm:mt-5 sm:text-lg sm:leading-8">{body}</p>
     </div>
   );
 }
 
 export default function App() {
+  useScrollReveal();
+
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-ink text-white">
       <ParticleHeroBackground />
