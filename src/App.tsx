@@ -1,5 +1,6 @@
 import {
   AlertTriangle,
+  ArrowUp,
   BadgeCheck,
   BrainCircuit,
   MousePointer2,
@@ -599,6 +600,42 @@ function SectionHeader({ title, body }: { title: string; body: string }) {
   );
 }
 
+function BackToTopButton() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const updateVisibility = () => {
+      const pageHeight = document.documentElement.scrollHeight;
+      const scrollBottom = window.scrollY + window.innerHeight;
+      const isNearBottom = pageHeight - scrollBottom <= 180;
+
+      setIsVisible(isNearBottom && window.scrollY > 320);
+    };
+
+    updateVisibility();
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    window.addEventListener("resize", updateVisibility);
+
+    return () => {
+      window.removeEventListener("scroll", updateVisibility);
+      window.removeEventListener("resize", updateVisibility);
+    };
+  }, []);
+
+  return (
+    <button
+      type="button"
+      aria-label="Scroll to top"
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      className={`fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-50 grid h-12 w-12 place-items-center rounded-full border border-cyan-200/35 bg-slate-950/72 text-cyan-100 shadow-[0_18px_42px_rgba(8,47,73,0.38)] backdrop-blur-xl transition duration-300 ease-out hover:-translate-y-0.5 hover:border-cyan-100/65 hover:bg-cyan-400/14 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan-300 sm:bottom-[calc(env(safe-area-inset-bottom)+1.5rem)] sm:right-6 ${
+        isVisible ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-4 opacity-0"
+      }`}
+    >
+      <ArrowUp className="h-5 w-5" aria-hidden="true" />
+    </button>
+  );
+}
+
 export default function App() {
   useScrollReveal();
 
@@ -614,6 +651,7 @@ export default function App() {
         <ImpactSection />
         <Footer />
       </div>
+      <BackToTopButton />
     </main>
   );
 }
